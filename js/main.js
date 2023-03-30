@@ -26,6 +26,7 @@ btnClear.addEventListener("click", function (event) {
     txtNombre.value = "";
     txtNumber.value = "";
     cuerpoTabla[0].innerHTML = "";
+
     contador = 0;
     totalEnProductos = 0;
     costoTotal = 0;
@@ -75,7 +76,7 @@ btnAgregar.addEventListener("click", function (event) {
     } else {
         txtNombre.style.border = "";
     }//if txtNombre
-
+    
     if (!validarCantidad()) {// ! negación de la función
         txtNumber.style.border = "solid thin red";//Agrega borde en rojo
         lista += "<li>Se debe escribir una cantidad válida";
@@ -123,3 +124,22 @@ txtNombre.addEventListener("blur", function (event) {
     event.preventDefault();
     txtNombre.value = txtNombre.value.trim();//.trim borra los espacios 
 });// txtNombre .blur //Al salir del campo se activa
+
+window.addEventListener("load", function(event){//Mantiene los valores en el resumen aunque se actualice el navegador
+    if (localStorage.getItem("contadorProductos")==null){
+        localStorage.setItem("contadorProductos", "0");
+    }//if
+    if (localStorage.getItem("totalEnProductos")==null){
+        localStorage.setItem("totalEnProductos", "0");
+    }//if
+    if (localStorage.getItem("costoTotal")==null){
+        localStorage.setItem("costoTotal", "0.0");
+    }//if
+    contador = parseInt(localStorage.getItem("contadorProductos"));
+    totalEnProductos = parseInt(localStorage.getItem("totalEnProductos"));
+    costoTotal = parseFloat(localStorage.getItem("costoTotal"));
+
+    contadorProductos.innerTex=contador;
+    productosTotal.innerText=totalEnProductos;
+    precioTotal.innerText="$ "+ costoTotal;
+});
