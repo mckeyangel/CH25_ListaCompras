@@ -20,6 +20,8 @@ let precio = 0;
 let contador = 0;
 let totalEnProductos = 0;
 let costoTotal = 0;
+
+let datos = [];//Aquí se alamacenrán los datos de la tabla
 // Limpiar Campos
 btnClear.addEventListener("click", function (event) {
     event.preventDefault();
@@ -30,9 +32,9 @@ btnClear.addEventListener("click", function (event) {
     contador = 0;
     totalEnProductos = 0;
     costoTotal = 0;
-    contadorProductos.innerTex="0";
-    productosTotal.innerText="0";
-    precioTotal.innerText="$ 0";
+    contadorProductos.innerTex = "0";
+    productosTotal.innerText = "0";
+    precioTotal.innerText = "$ 0";
 
     localStorage.setItem("contadorProductos", contador);
     localStorage.setItem("totalEnProductos", totalEnProductos);
@@ -76,7 +78,7 @@ btnAgregar.addEventListener("click", function (event) {
     } else {
         txtNombre.style.border = "";
     }//if txtNombre
-    
+
     if (!validarCantidad()) {// ! negación de la función
         txtNumber.style.border = "solid thin red";//Agrega borde en rojo
         lista += "<li>Se debe escribir una cantidad válida";
@@ -100,15 +102,30 @@ btnAgregar.addEventListener("click", function (event) {
                   <td>$ ${precio}</td>
               </tr>`;
 
+        let elemento = `{
+                       "id": ${contador},
+                       "nombre" : "${txtNombre.value}",
+                       "cantidad" : "${txtNumber.value}",
+                       "precio" : "${precio}"
+                       }`; //Se crea JSON para el arreglo datos
+        datos.push(JSON.parse(elemento));//Se agregan elementos al arreglo//Se convierte JSON a objeto 
+
+        localStorage.setItem("datos", JSON.stringify(datos));//Se guarda en navegador//JSON.stringify convierte el arreglo a string
+
         cuerpoTabla[0].insertAdjacentHTML("beforeend", row);//Insertar dentro del cuerpo de la tabla
-        contadorProductos.innerText=contador;//Muestra el contador de productos en resultado
+        contadorProductos.innerText = contador;//Muestra el contador de productos en resultado
         totalEnProductos += parseFloat(txtNumber.value);//Suma la cantidad de los productos
-        productosTotal.innerText=totalEnProductos;//Muestra la suma de la cantidad de productos
-        costoTotal += precio*parseFloat(txtNumber.value);
-        precioTotal.innerText= "$ "+costoTotal.toFixed(2);
-        localStorage.setItem("contadorProductos", contador);
-        localStorage.setItem("totalEnProductos", totalEnProductos);
-        localStorage.setItem("costoTotal", costoTotal.toFixed(2));//guardar info en el navegador
+        productosTotal.innerText = totalEnProductos;//Muestra la suma de la cantidad de productos
+        costoTotal += precio * parseFloat(txtNumber.value);
+        precioTotal.innerText = "$ " + costoTotal.toFixed(2);
+        let resumen = `{"contadorProductos" : ${contador},
+        "totalEnProductos" : ${totalEnProductos},
+        "costoTotal" : ${costoTotal.toFixed(2)}}`;//Sintaxis JSON
+        localStorage.setItem("resumen", resumen);//Se guardan los elementos en el navegador de forma local
+        //++++++++++++++++++Se comentan para implementar JSON+++++++++++++++//
+        // localStorage.setItem("contadorProductos", contador);
+        // localStorage.setItem("totalEnProductos", totalEnProductos);
+        // localStorage.setItem("costoTotal", costoTotal.toFixed(2));//guardar info en el navegador
         txtNombre.value = "";
         txtNumber.value = "";
         txtNombre.focus();//Coloca el foco en ese punto
@@ -125,21 +142,45 @@ txtNombre.addEventListener("blur", function (event) {
     txtNombre.value = txtNombre.value.trim();//.trim borra los espacios 
 });// txtNombre .blur //Al salir del campo se activa
 
-window.addEventListener("load", function(event){//Mantiene los valores en el resumen aunque se actualice el navegador
-    if (localStorage.getItem("contadorProductos")==null){
-        localStorage.setItem("contadorProductos", "0");
+window.addEventListener("load", function (event) {//Mantiene los valores en el resumen aunque se actualice el navegador
+    if (localStorage.getItem("resumen") == null) {
+        let resumen = `{"contadorProductos" : ${contador},
+        "totalEnProductos" : ${totalEnProductos},
+        "costoTotal" : ${costoTotal.toFixed(2)}}`;
+        localStorage.setItem("resumen", resumen);
     }//if
-    if (localStorage.getItem("totalEnProductos")==null){
-        localStorage.setItem("totalEnProductos", "0");
-    }//if
-    if (localStorage.getItem("costoTotal")==null){
-        localStorage.setItem("costoTotal", "0.0");
-    }//if
-    contador = parseInt(localStorage.getItem("contadorProductos"));
-    totalEnProductos = parseInt(localStorage.getItem("totalEnProductos"));
-    costoTotal = parseFloat(localStorage.getItem("costoTotal"));
+    let res = JSON.parse(localStorage.getItem("resumen"));//Se convierte el valor producido y sus propiedades, y devuelve el valor
+    if (localStorage.getItem("datos") != null){
+        datos = JSON.parse(localStorage.getItem("datos"));
+        
+        datos.forEach(r => {
+            let row = `<tr>
+                  <th>${r.id}</th>
+                  <td>${r.nombre}</td>
+                  <td>${r.cantidad}</td>
+                  <td>$ ${r.precio}</td>
+              </tr>`;
+              cuerpoTabla[0].insertAdjacentHTML("beforeend", row);//Llama a la tabla y agrega elementos
+        });
+    }//if !null diferente de null
+    
+    
+    
+    
+    // if (localStorage.getItem("contadorProductos")==null){
+    //     localStorage.setItem("contadorProductos", "0");
+    // }//if
+    // if (localStorage.getItem("totalEnProductos")==null){
+    //     localStorage.setItem("totalEnProductos", "0");
+    // }//if
+    // if (localStorage.getItem("costoTotal")==null){
+    //     localStorage.setItem("costoTotal", "0.0");
+    // }//if
+    contador = res.contadorProductos; //parseInt(localStorage.getItem("contadorProductos"));
+    totalEnProductos = res.totalEnProductos;//parseInt(localStorage.getItem("totalEnProductos"));
+    costoTotal = res.costoTotal;//parseFloat(localStorage.getItem("costoTotal"));
 
-    contadorProductos.innerTex=contador;
-    productosTotal.innerText=totalEnProductos;
-    precioTotal.innerText="$ "+ costoTotal;
+    contadorProductos.innerTex = contador;
+    productosTotal.innerText = totalEnProductos;
+    precioTotal.innerText = "$ " + costoTotal;
 });
